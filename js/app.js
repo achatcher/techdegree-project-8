@@ -4,7 +4,7 @@ const urlAPI = `https://randomuser.me/api/?results=12&inc=name, picture, email, 
 const gridContainer = document.querySelector(".grid-container");
 const overlay = document.querySelector(".overlay");
 const modalContainer = document.querySelector(".modal-content");
-const modalClose = document.querySelector(".modal-close");
+const modalClose = document.querySelector(".overlay");
 
 // fetch data from API
 fetch(urlAPI)
@@ -13,17 +13,15 @@ fetch(urlAPI)
     .then(displayEmployees)
     .catch(err => console.log(err))
 
+// Insert employees
 function displayEmployees(employeeData) {
     employees = employeeData;
-    // store the employee HTML as we create it
     let employeeHTML = '';
-    // loop through each employee and create HTML markup
     employees.forEach((employee, index) => {
         let name = employee.name;
         let email = employee.email;
         let city = employee.location.city;
         let picture = employee.picture;
-    // template literals make this so much cleaner!
         employeeHTML += `
             <div class="card" data-index="${index}">
                 <img class="avatar" src="${picture.large}" />
@@ -38,12 +36,12 @@ function displayEmployees(employeeData) {
     gridContainer.innerHTML = employeeHTML;
 }
 
+// Insert employees modal
 function displayModal(index) {
-    // use object destructuring make our template literal cleaner
     let { name, dob, phone, email, location: { city, street, state, postcode}, picture } = employees[index];
     let date = new Date(dob.date);
     const modalHTML = `
-        <img class="avatar" src="${picture.large}" />
+        <img class="avatarLarge" src="${picture.large}" />
         <div class="text-container">
             <h2 class="name">${name.first} ${name.last}</h2>
             <p class="email">${email}</p>
@@ -58,32 +56,33 @@ function displayModal(index) {
     modalContainer.innerHTML = modalHTML;
 }
 
+// Display modal - on click
 gridContainer.addEventListener('click', e => {
-    // make sure the click is not on the gridContainer itself
     if (e.target !== gridContainer) {
-        // select the card element based on its proximity to actual element clicked
         const card = e.target.closest(".card");
         const index = card.getAttribute('data-index');
         displayModal(index);
     }
 });
+
+// Close modal - on click
 modalClose.addEventListener('click', () => {
     overlay.classList.add("hidden");
 });
 
 //Search functionality
 document.getElementById("searchbar").addEventListener("keyup", searchEmployees);
-
 function searchEmployees() {
-    const input = document.getElementById("searchbar").value.toLowerCase();
-    let cards = document.querySelectorAll(".card");
-    for (let i = 0; i < cards.length; i++) {
-        let card = cards[i];
-        let names = card.querySelector(".name").toLowerCase();
-        if (names.indexOf(input) > -1) {
-            cards[i].style.display="";
+    let card = document.querySelectorAll('.card')
+    let input = document.getElementById('searchbar');
+    let searchFilter = input.value.toUpperCase();
+    for (let i = 0; i < card.length; i++) {
+        let names = card[i].querySelector('.name');
+        let nameValue = names.textContent || names.innerText;
+        if (nameValue.toUpperCase().indexOf(searchFilter) > -1) { 
+            card[i].style.display = "";
         } else {
-            cards[i].style.display="none";
+            card[i].style.display ="none";
         }
     }
 }

@@ -1,6 +1,7 @@
+/*jshint esversion: 6 */
 // global variables
 let employees = [];
-const urlAPI = `https://randomuser.me/api/?results=12&inc=name, picture, email, location, phone, dob &noinfo &nat=US`
+const urlAPI = `https://randomuser.me/api/?results=12&inc=name, picture, email, location, phone, dob &noinfo &nat=US`;
 const gridContainer = document.querySelector(".grid-container");
 const overlay = document.querySelector(".overlay");
 const modalContainer = document.querySelector(".modal-content");
@@ -11,7 +12,7 @@ fetch(urlAPI)
     .then(res => res.json())
     .then(res => res.results)
     .then(displayEmployees)
-    .catch(err => console.log(err))
+    .catch(err => console.log(err));
 
 // Insert employees
 function displayEmployees(employeeData) {
@@ -31,7 +32,7 @@ function displayEmployees(employeeData) {
                     <p class="address">${city}</p>
                 </div>
             </div>
-        `
+        `;
     });
     gridContainer.innerHTML = employeeHTML;
 }
@@ -73,7 +74,7 @@ modalClose.addEventListener('click', () => {
 //Search functionality
 document.getElementById("searchbar").addEventListener("keyup", searchEmployees);
 function searchEmployees() {
-    let card = document.querySelectorAll('.card')
+    let card = document.querySelectorAll('.card');
     let input = document.getElementById('searchbar');
     let searchFilter = input.value.toUpperCase();
     for (let i = 0; i < card.length; i++) {

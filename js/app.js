@@ -1,98 +1,89 @@
-//array to hold photo info 
-const photos = [
-    {
-        name: `01`,
-        title: `Hay Bales`,
-        caption: `I love hay bales. Took this snap on a drive through the countryside past some straw fields.`,
-    },
-    {
-        name: `02`,
-        title: `Lake`,
-        caption: `The lake was so calm today. We had a great view of the snow on the mountains from here.`,
-    },
-    {
-        name: `03`,
-        title: `Canyon`,
-        caption: `I hiked to the top of the mountain and got this picture of the canyon and trees below.`,
-    },
-    {
-        name: `04`,
-        title: `Iceberg`,
-        caption: `It was amazing to see an iceberg up close, it was so cold but didn’t snow today.`,
-    },
-    {
-        name: `05`,
-        title: `Desert`,
-        caption: `The red cliffs were beautiful. It was really hot in the desert but we did a lot of walking through the canyons.`,
-    },
-    {
-        name: `06`,
-        title: `Fall`,
-        caption: `Fall is coming, I love when the leaves on the trees start to change color.`,
-    },
-    {
-        name: `07`,
-        title: `Plantation`,
-        caption: `I drove past this plantation yesterday, everything is so green!`,
-    },
-    {
-        name: `08`,
-        title: `Dunes`,
-        caption: `My summer vacation to the Oregon Coast. I love the sandy dunes!`,
-    },
-    {
-        name: `09`,
-        title: `Countryside Lane`,
-        caption: `We enjoyed a quiet stroll down this countryside lane.`,
-    },
-    {
-        name: `10`,
-        title: `Sunset`,
-        caption: `Sunset at the coast! The sky turned a lovely shade of orange.`,
-    },
-    {
-        name: `11`,
-        title: `Cave`,
-        caption: `I did a tour of a cave today and the view of the landscape below was breathtaking.`,
-    },
-    {
-        name: `12`,
-        title: `Bluebells`,
-        caption: `I walked through this meadow of bluebells and got a good view of the snow on the mountain before the fog came in.`,
-    },
-];
+// global variables
+let employees = [];
+const urlAPI = `https://randomuser.me/api/?results=12&inc=name, picture, email, location, phone, dob &noinfo &nat=US`
+const gridContainer = document.querySelector(".grid-container");
+const overlay = document.querySelector(".overlay");
+const modalContainer = document.querySelector(".modal-content");
+const modalClose = document.querySelector(".modal-close");
 
-//dynamically adds photos from array into HTML
-function createPhotoHTML(photo) {
-    return `
-        <a class="photos" id="${photo.name}" href="img/${photo.name}.jpg" title="${photo.title}" data-caption="${photo.caption}">
-            <img src="img/thumbnails/${photo.name}.jpg" alt="Photo of ${photo.title}">
-        </a>
-    `;
+// fetch data from API
+fetch(urlAPI)
+    .then(res => res.json())
+    .then(res => res.results)
+    .then(displayEmployees)
+    .catch(err => console.log(err))
+
+function displayEmployees(employeeData) {
+    employees = employeeData;
+    // store the employee HTML as we create it
+    let employeeHTML = '';
+    // loop through each employee and create HTML markup
+    employees.forEach((employee, index) => {
+        let name = employee.name;
+        let email = employee.email;
+        let city = employee.location.city;
+        let picture = employee.picture;
+    // template literals make this so much cleaner!
+        employeeHTML += `
+            <div class="card" data-index="${index}">
+                <img class="avatar" src="${picture.large}" />
+                <div class="text-container">
+                    <h2 class="name">${name.first} ${name.last}</h2>
+                    <p class="email">${email}</p>
+                    <p class="address">${city}</p>
+                </div>
+            </div>
+        `
+    });
+    gridContainer.innerHTML = employeeHTML;
 }
 
-document.querySelector('.gallery').innerHTML = photos.map(photo => createPhotoHTML(photo)).join('');
+function displayModal(index) {
+    // use object destructuring make our template literal cleaner
+    let { name, dob, phone, email, location: { city, street, state, postcode}, picture } = employees[index];
+    let date = new Date(dob.date);
+    const modalHTML = `
+        <img class="avatar" src="${picture.large}" />
+        <div class="text-container">
+            <h2 class="name">${name.first} ${name.last}</h2>
+            <p class="email">${email}</p>
+            <p class="address">${city}</p>
+            <hr />
+            <p>${phone}</p>
+            <p class="address">${street}, ${state} ${postcode}</p>
+            <p>Birthday: ${date.getMonth()}/${date.getDate()}/${date.getFullYear()}</p>
+        </div>
+    `;
+    overlay.classList.remove("hidden");
+    modalContainer.innerHTML = modalHTML;
+}
 
-//lightbox plugin
-window.addEventListener('load', function() {
-  baguetteBox.run('.gallery',{
-    buttons: true
-  });
+gridContainer.addEventListener('click', e => {
+    // make sure the click is not on the gridContainer itself
+    if (e.target !== gridContainer) {
+        // select the card element based on its proximity to actual element clicked
+        const card = e.target.closest(".card");
+        const index = card.getAttribute('data-index');
+        displayModal(index);
+    }
+});
+modalClose.addEventListener('click', () => {
+    overlay.classList.add("hidden");
 });
 
 //Search functionality
-document.getElementById("searchbar").addEventListener("keyup", searchPhotos);
+document.getElementById("searchbar").addEventListener("keyup", searchEmployees);
 
-function searchPhotos() {
+function searchEmployees() {
     const input = document.getElementById("searchbar").value.toLowerCase();
-    let pics = document.querySelectorAll(".photos");
-    for (let i = 0; i < pics.length; i++) {
-        let pic = pics[i];
-        let caption = pic.getAttribute("data-caption").toLowerCase();
-        if (caption.indexOf(input) > -1) {
-            pics[i].style.display="";
+    let cards = document.querySelectorAll(".card");
+    for (let i = 0; i < cards.length; i++) {
+        let card = cards[i];
+        let names = card.querySelector(".name").toLowerCase();
+        if (names.indexOf(input) > -1) {
+            cards[i].style.display="";
         } else {
-            pics[i].style.display="none";
+            cards[i].style.display="none";
         }
     }
 }
